@@ -4,6 +4,7 @@ isitgoodpsswd = 0
 smalllenght = False
 digit = False
 upper = False
+lower = False
 
 ### Проверки пароля
 
@@ -23,9 +24,30 @@ if any(char.isupper() for char in psswd):
     isitgoodpsswd += 2
 else:
     upper = True
+if any(char.islower() for char in psswd):
+    isitgoodpsswd += 2
+else:
+    lower = True
+if any(not char.isalnum() for char in psswd):
+    isitgoodpsswd += 2
+else:
+    print("use different special characters in your password")
+
+#проверка по базе простых паролей
+with open("10k_most_common.txt", "r") as f:
+    common_passwords = {line.strip() for line in f}
+
+if psswd in common_passwords:
+    isitgoodpsswd = 0
+    print("Your password is too common! Try again.")
+
+
 
 ### Выводы о пароле
 
+if psswd in common_passwords:
+    isitgoodpsswd = 0
+    print("Your password is too common! Try again.")
 
 if smalllenght == True:
     print("Psswd should have lenght at least 16 digit, dummy")
@@ -39,7 +61,7 @@ else:
     print("digits are a good way to make your OF or PornHub account protected. Good job gooner!")
 
 if upper == True:
-    print("""it's okay just tru to use SHIFT next time""")
+    print("""it's okay just try to use SHIFT next time""")
 else:
     print("nice, you are better than a lot of people in choosing passwords")
 
