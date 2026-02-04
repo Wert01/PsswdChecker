@@ -49,3 +49,6 @@ elif isitgoodpsswd >= 4 and isitgoodpsswd < 8:
     print("could be better")
 elif isitgoodpsswd < 4:
     print("try again!")
+
+if psswd == "1111":
+    print("Serious?")
