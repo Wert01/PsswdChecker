@@ -1,76 +1,123 @@
-### 1. надо будет добавить для Lower 2. сделать роверку по базе простых паролей
+# -*- coding: utf-8 -*-
+from pathlib import Path
+import sys
 
-isitgoodpsswd = 0
-smalllenght = False
-digit = False
-upper = False
-lower = False
+# Ввод пароля пользователем
+def vvod():
+    s = input("Vvedite parol': ")
+    return s
 
-### Проверки пароля
+# Проверка на наличие в списке самых распространенных паролей
+def psswd_list(psswd):
+    common_path = Path(__file__).with_name("most_common.txt")
+    with common_path.open("r", encoding="utf-8", errors="ignore") as f:
+        common_passwords = f.read().splitlines()
+    if psswd in common_passwords:
+        print("Слишком просто")
+        sys.exit(0)
+    else:
+        return True
+    
+# Проверка длины пароля
+def amount(psswd):
+    if len(psswd) <= 8:
+        print("Пароль слишком короткий")
+        sys.exit(0)
+    elif len(psswd) < 12:
+        return False
+    else:
+        return True
 
-psswd = input("Enter your password: ")
-if len(psswd) >= 8 and len(psswd) < 16 :
-    isitgoodpsswd += 1
-    smalllenght = True
-elif len(psswd) >= 16:
-    isitgoodpsswd += 3
+# Проверка на наличие цифр в пароле
+def digits(psswd):
+    for char in psswd:
+        if char.isdigit():
+            return True
+    return False
 
-if any(char.isdigit() for char in psswd):
-    isitgoodpsswd += 3
-else:
-    digit = True
+# Проверка на наличие заглавных букв в пароле
+def uppercase(psswd):
+    for char in psswd:
+        if char.isupper():
+            return True
+    return False
 
-if any(char.isupper() for char in psswd):
-    isitgoodpsswd += 2
-else:
-    upper = True
-if any(char.islower() for char in psswd):
-    isitgoodpsswd += 2
-else:
-    lower = True
-if any(not char.isalnum() for char in psswd):
-    isitgoodpsswd += 2
-else:
-    print("use different special characters in your password")
+# Проверка на наличие специальных символов в пароле
+def special_char(psswd):
+    for char in psswd:
+        if char.isalnum() == False:
+            return True
+    return False
 
-#проверка по базе простых паролей
-with open("10k_most_common.txt", "r") as f:
-    common_passwords = {line.strip() for line in f}
+# Проверка на наличие строчных букв в пароле
+def lowercase(psswd):
+    for char in psswd:
+        if char.islower():
+            return True
+    return False
 
-if psswd in common_passwords:
-    isitgoodpsswd = 0
-    print("Your password is too common! Try again.")
+# Проверка на повторяющиеся символы в пароле
+def repeat(psswd):
+    for i in range(len(psswd) - 1):
+        if psswd[i] == psswd[i + 1]:
+            return True
+    return False
+
+# Проверка на тройные повторяющиеся символы в пароле
+def repeat1(psswd):
+    for i in range(len(psswd) - 2):
+        if psswd[i] == psswd[i + 1] == psswd[i + 2]:
+            return True
+    return False
+
+# Определение минимального уровня пароля
+def minscore(lv1_2, a):
+    if a == False:
+        if lv1_2.count(True) == 2:
+            print("Minimal level!")
+            sys.exit(0)
+
+# Определение верхнего уровня пароля
+def uppermin(lv1_2, a, r, r1):
+    if a == False:
+        if lv1_2.count(True) == len(lv1_2) and (r == True or r1 == True):
+            print("Uppermin level!")
+            sys.exit(0)
+
+# Определение среднего уровня пароля
+def justmid(lv3, a, r1):
+    if a == False:
+        if lv3.count(True) >= 3 and r1 == False:
+            print("Just mid level!")
+            sys.exit(0)
+
+# Определение хорошего уровня пароля
+def good(lv4, a, r1, r2):
+    if a == True:
+        if lv4.count(True) == len(lv4) and r1 == False and r2 == False:
+            print("Good level!")
+            sys.exit(0)
 
 
+def main():
+    psswd = vvod()
+    psswd_list(psswd)
+    a = amount(psswd)
+    d = digits(psswd)
+    u = uppercase(psswd)
+    s = special_char(psswd)
+    low = lowercase(psswd)
+    r = repeat(psswd)
+    r1 = repeat1(psswd)
 
-### Выводы о пароле
-
-if psswd in common_passwords:
-    isitgoodpsswd = 0
-    print("Your password is too common! Try again.")
-
-if smalllenght == True:
-    print("Psswd should have lenght at least 16 digit, dummy")
-else:
-    print("Hody partner! a lot of digits you have here! NICE!")
+    lv = [d, u, s, low]
+    minscore(lv, a)
+    uppermin(lv, a, r, r1)
+    justmid(lv, a, r1)
+    good(lv, a, r, r1)
+    print("Уровень пароля не определён (попробуйте изменить критерии).")
 
 
-if digit == True:
-    print("""No digits in a password? That is not even "111" type shit""")
-else:
-    print("digits are a good way to make your OF or PornHub account protected. Good job gooner!")
+if __name__ == "__main__":
+    main()
 
-if upper == True:
-    print("""it's okay just try to use SHIFT next time""")
-else:
-    print("nice, you are better than a lot of people in choosing passwords")
-
-if isitgoodpsswd == 8:
-    print("ok")
-elif isitgoodpsswd >= 4 and isitgoodpsswd < 8:
-    print("could be better")
-elif isitgoodpsswd < 4:
-    print("try again!")
-
-if psswd == "1111":
-    print("Serious?")
