@@ -78,7 +78,7 @@ def max_repeat_run(psswd):
 def the_most_min(lv, a):
     if a == False:
         if lv.count(True) == 1:
-            print("The most min level!")
+            print("THE WORST LEVEL!")
             sys.exit(0)
 
 # Определение минимального уровня пароля
@@ -143,6 +143,7 @@ def main():
     mxr = max_repeat_run(psswd)
 
     lv = [d, u, s, low]
+    the_most_min(lv, a)
     minscore(lv, a)
     uppermin(lv, a)
     justmid(lv, a, mxr)
@@ -150,6 +151,7 @@ def main():
     dlinbad(a, lv)
     dlinpovtor(a, mxr, lv)
     good_level(a, lv, mxr)
+
     print("Уровень пароля не определён (попробуйте изменить критерии).")
 
 
