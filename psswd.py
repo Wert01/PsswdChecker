@@ -59,21 +59,27 @@ def lowercase(psswd):
     return False
 
 # Проверка на повторяющиеся символы в пароле
-def repeat(psswd):
-    for i in range(len(psswd) - 1):
-        if psswd[i] == psswd[i + 1]:
-            return True
-    return False
+def max_repeat_run(psswd):
+    if not psswd:
+        return 0
+    max_run = run = 1
+    for i in range(1, len(psswd)):
+        if psswd[i] == psswd[i-1]:
+            run += 1
+            max_run = max(max_run, run)
+        else:
+            run = 1
+    return max_run
 
-# Проверка на тройные повторяющиеся символы в пароле
-def repeat1(psswd):
-    for i in range(len(psswd) - 2):
-        if psswd[i] == psswd[i + 1] == psswd[i + 2]:
-            return True
-    return False
 
 
 ### УРОВНИ ПАРОЛЕЙ ###
+
+def the_most_min(lv, a):
+    if a == False:
+        if lv.count(True) == 1:
+            print("The most min level!")
+            sys.exit(0)
 
 # Определение минимального уровня пароля
 def minscore(lv, a):
@@ -83,23 +89,23 @@ def minscore(lv, a):
             sys.exit(0)
 
 # Определение верхнего уровня пароля
-def uppermin(lv, a, r, r1):
+def uppermin(lv, a):
     if a == False:
-        if lv.count(True) == len(lv) and (r == True or r1 == True):
+        if lv.count(True) == len(lv):
             print("Uppermin level!")
             sys.exit(0)
 
 # Определение среднего уровня пароля
-def justmid(lv, a, r1):
+def justmid(lv, a, mxr):
     if a == False:
-        if lv.count(True) >= 3 and r1 == False:
+        if lv.count(True) >= 3 and mxr <= 2:
             print("Just mid level!")
             sys.exit(0)
 
 # Определение хорошего уровня пароля
-def good(lv, a, r1, r2):
+def good(lv, a, mxr):
     if a == True:
-        if lv.count(True) == len(lv) and r1 == False and r2 == False:
+        if lv.count(True) == len(lv) and mxr == 1:
             print("Good level!")
             sys.exit(0)
 
@@ -107,21 +113,21 @@ def good(lv, a, r1, r2):
 def dlinbad(a, lv):
     if a == True:
         if lv.count(True) < len(lv):
-            print("Пароль длинный, но не достаточно сложный.")
+            print("Пароль длинный, но недостаточно сложный.")
             sys.exit(0)
 
 # Определение длинного пароля с повторяющимися символами
-def dlinpovtor(a, r, r1):
+def dlinpovtor(a, mxr, lv):
     if a == True:
-        if r == True or r1 == True:
+        if mxr >= 2 and lv.count(True) == len(lv):
             print("Пароль длинный, но содержит повторяющиеся символы.")
             sys.exit(0)
 
-# Определение хорошего уровня пароля с повторами
-def good_level(a, lv, r, r1):
+# Определение длинного пароля без повторов
+def good_level(a, lv, mxr):
     if a == True:
-        if lv.count(True) == len(lv) and (r == True or r1 == True):
-            print("Хороший уровень, но с повторами")
+        if lv.count(True) == len(lv) and mxr == 1:
+            print("Хороший уровень")
             sys.exit(0)            
 
 
@@ -134,15 +140,16 @@ def main():
     u = uppercase(psswd)
     s = special_char(psswd)
     low = lowercase(psswd)
-    r = repeat(psswd)
-    r1 = repeat1(psswd)
+    mxr = max_repeat_run(psswd)
 
     lv = [d, u, s, low]
     minscore(lv, a)
-    uppermin(lv, a, r, r1)
-    justmid(lv, a, r1)
-    good(lv, a, r, r1)
+    uppermin(lv, a)
+    justmid(lv, a, mxr)
+    good(lv, a, mxr)
     dlinbad(a, lv)
+    dlinpovtor(a, mxr, lv)
+    good_level(a, lv, mxr)
     print("Уровень пароля не определён (попробуйте изменить критерии).")
 
 
