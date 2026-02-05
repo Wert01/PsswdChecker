@@ -2,6 +2,8 @@
 from pathlib import Path
 import sys
 
+### ФУНКЦИИ ПРОВЕРКИ ПАРОЛЯ ###
+
 # Ввод пароля пользователем
 def vvod():
     s = input("Vvedite parol': ")
@@ -23,7 +25,7 @@ def amount(psswd):
     if len(psswd) <= 8:
         print("Пароль слишком короткий")
         sys.exit(0)
-    elif len(psswd) < 12:
+    elif len(psswd) < 11:
         return False
     else:
         return True
@@ -70,33 +72,58 @@ def repeat1(psswd):
             return True
     return False
 
+
+### УРОВНИ ПАРОЛЕЙ ###
+
 # Определение минимального уровня пароля
-def minscore(lv1_2, a):
+def minscore(lv, a):
     if a == False:
-        if lv1_2.count(True) == 2:
+        if lv.count(True) == 2:
             print("Minimal level!")
             sys.exit(0)
 
 # Определение верхнего уровня пароля
-def uppermin(lv1_2, a, r, r1):
+def uppermin(lv, a, r, r1):
     if a == False:
-        if lv1_2.count(True) == len(lv1_2) and (r == True or r1 == True):
+        if lv.count(True) == len(lv) and (r == True or r1 == True):
             print("Uppermin level!")
             sys.exit(0)
 
 # Определение среднего уровня пароля
-def justmid(lv3, a, r1):
+def justmid(lv, a, r1):
     if a == False:
-        if lv3.count(True) >= 3 and r1 == False:
+        if lv.count(True) >= 3 and r1 == False:
             print("Just mid level!")
             sys.exit(0)
 
 # Определение хорошего уровня пароля
-def good(lv4, a, r1, r2):
+def good(lv, a, r1, r2):
     if a == True:
-        if lv4.count(True) == len(lv4) and r1 == False and r2 == False:
+        if lv.count(True) == len(lv) and r1 == False and r2 == False:
             print("Good level!")
             sys.exit(0)
+
+# Определение длинного, но не сложного пароля
+def dlinbad(a, lv):
+    if a == True:
+        if lv.count(True) < len(lv):
+            print("Пароль длинный, но не достаточно сложный.")
+            sys.exit(0)
+
+# Определение длинного пароля с повторяющимися символами
+def dlinpovtor(a, r, r1):
+    if a == True:
+        if r == True or r1 == True:
+            print("Пароль длинный, но содержит повторяющиеся символы.")
+            sys.exit(0)
+
+# Определение хорошего уровня пароля с повторами
+def good_level(a, lv, r, r1):
+    if a == True:
+        if lv.count(True) == len(lv) and (r == True or r1 == True):
+            print("Хороший уровень, но с повторами")
+            sys.exit(0)            
+
 
 
 def main():
@@ -115,7 +142,9 @@ def main():
     uppermin(lv, a, r, r1)
     justmid(lv, a, r1)
     good(lv, a, r, r1)
+    dlinbad(a, lv)
     print("Уровень пароля не определён (попробуйте изменить критерии).")
+
 
 
 if __name__ == "__main__":
