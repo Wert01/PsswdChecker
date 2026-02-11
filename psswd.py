@@ -1,161 +1,112 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
+
+from dataclasses import dataclass
 from pathlib import Path
-import sys
+from typing import Dict, Set
 
-### ФУНКЦИИ ПРОВЕРКИ ПАРОЛЯ ###
 
-# Ввод пароля пользователем
-def vvod():
-    s = input("Vvedite parol': ")
-    return s
+_COMMON_CACHE: Set[str] | None = None
 
-# Проверка на наличие в списке самых распространенных паролей
-def psswd_list(psswd):
-    common_path = Path(__file__).with_name("most_common.txt")
-    with common_path.open("r", encoding="utf-8", errors="ignore") as f:
-        common_passwords = f.read().splitlines()
-    if psswd in common_passwords:
-        print("Слишком просто")
-        sys.exit(0)
-    else:
-        return True
-    
-# Проверка длины пароля
-def amount(psswd):
-    if len(psswd) <= 8:
-        print("Пароль слишком короткий")
-        sys.exit(0)
-    elif len(psswd) < 11:
-        return False
-    else:
-        return True
 
-# Проверка на наличие цифр в пароле
-def digits(psswd):
-    for char in psswd:
-        if char.isdigit():
-            return True
-    return False
+@dataclass(frozen=True)
+class Evaluation:
+    password: str
+    length: int
+    in_common: bool
+    max_repeat_run: int
+    criteria: Dict[str, bool]
+    score: int
+    level: str
+    message: str
 
-# Проверка на наличие заглавных букв в пароле
-def uppercase(psswd):
-    for char in psswd:
-        if char.isupper():
-            return True
-    return False
 
-# Проверка на наличие специальных символов в пароле
-def special_char(psswd):
-    for char in psswd:
-        if char.isalnum() == False:
-            return True
-    return False
+def _load_common_passwords(path: Path) -> Set[str]:
+    global _COMMON_CACHE
+    if _COMMON_CACHE is not None:
+        return _COMMON_CACHE
+    if not path.exists():
+        _COMMON_CACHE = set()
+        return _COMMON_CACHE
+    with path.open("r", encoding="utf-8", errors="ignore") as f:
+        _COMMON_CACHE = set(line.strip() for line in f if line.strip())
+    return _COMMON_CACHE
 
-# Проверка на наличие строчных букв в пароле
-def lowercase(psswd):
-    for char in psswd:
-        if char.islower():
-            return True
-    return False
 
-# Проверка на повторяющиеся символы в пароле
-def max_repeat_run(psswd):
+def _max_repeat_run(psswd: str) -> int:
     if not psswd:
         return 0
     max_run = run = 1
     for i in range(1, len(psswd)):
-        if psswd[i] == psswd[i-1]:
+        if psswd[i] == psswd[i - 1]:
             run += 1
-            max_run = max(max_run, run)
+            if run > max_run:
+                max_run = run
         else:
             run = 1
     return max_run
 
 
+def analyze_password(psswd: str, common_path: Path | None = None) -> Evaluation:
+    if common_path is None:
+        common_path = Path(__file__).with_name("most_common.txt")
 
-### УРОВНИ ПАРОЛЕЙ ###
+    length = len(psswd)
+    in_common = psswd in _load_common_passwords(common_path)
+    max_repeat_run = _max_repeat_run(psswd)
 
-def the_most_min(lv, a):
-    if a == False:
-        if lv.count(True) == 1:
-            print("THE WORST LEVEL!")
-            sys.exit(0)
+    criteria = {
+        "length_12": length >= 12,
+        "digit": any(ch.isdigit() for ch in psswd),
+        "upper": any(ch.isupper() for ch in psswd),
+        "lower": any(ch.islower() for ch in psswd),
+        "special": any(not ch.isalnum() for ch in psswd),
+        "no_long_repeat": max_repeat_run <= 2,
+    }
 
-# Определение минимального уровня пароля
-def minscore(lv, a):
-    if a == False:
-        if lv.count(True) == 2:
-            print("Minimal level!")
-            sys.exit(0)
+    score = sum(criteria.values())
 
-# Определение верхнего уровня пароля
-def uppermin(lv, a):
-    if a == False:
-        if lv.count(True) == len(lv):
-            print("Uppermin level!")
-            sys.exit(0)
+    if not psswd:
+        level = "Пустой"
+        message = "Введите пароль для проверки."
+    elif in_common:
+        level = "Слишком простой"
+        message = "Пароль в списке самых распространенных."
+    elif length < 8:
+        level = "Очень короткий"
+        message = "Минимальная длина — 8 символов."
+    else:
+        if score <= 2:
+            level = "Слабый"
+            message = "Добавьте длину и разные типы символов."
+        elif score <= 4:
+            level = "Средний"
+            message = "Почти хорошо: добавьте недостающие типы символов."
+        elif score == 5:
+            level = "Хороший"
+            message = "Надежно, но можно улучшить повторяемость."
+        else:
+            level = "Отличный"
+            message = "Очень надежный пароль."
 
-# Определение среднего уровня пароля
-def justmid(lv, a, mxr):
-    if a == False:
-        if lv.count(True) >= 3 and mxr <= 2:
-            print("Just mid level!")
-            sys.exit(0)
-
-# Определение хорошего уровня пароля
-def good(lv, a, mxr):
-    if a == True:
-        if lv.count(True) == len(lv) and mxr == 1:
-            print("Good level!")
-            sys.exit(0)
-
-# Определение длинного, но не сложного пароля
-def dlinbad(a, lv):
-    if a == True:
-        if lv.count(True) < len(lv):
-            print("Пароль длинный, но недостаточно сложный.")
-            sys.exit(0)
-
-# Определение длинного пароля с повторяющимися символами
-def dlinpovtor(a, mxr, lv):
-    if a == True:
-        if mxr >= 2 and lv.count(True) == len(lv):
-            print("Пароль длинный, но содержит повторяющиеся символы.")
-            sys.exit(0)
-
-# Определение длинного пароля без повторов
-def good_level(a, lv, mxr):
-    if a == True:
-        if lv.count(True) == len(lv) and mxr == 1:
-            print("Хороший уровень")
-            sys.exit(0)            
+    return Evaluation(
+        password=psswd,
+        length=length,
+        in_common=in_common,
+        max_repeat_run=max_repeat_run,
+        criteria=criteria,
+        score=score,
+        level=level,
+        message=message,
+    )
 
 
-
-def main():
-    psswd = vvod()
-    psswd_list(psswd)
-    a = amount(psswd)
-    d = digits(psswd)
-    u = uppercase(psswd)
-    s = special_char(psswd)
-    low = lowercase(psswd)
-    mxr = max_repeat_run(psswd)
-
-    lv = [d, u, s, low]
-    the_most_min(lv, a)
-    minscore(lv, a)
-    uppermin(lv, a)
-    justmid(lv, a, mxr)
-    good(lv, a, mxr)
-    dlinbad(a, lv)
-    dlinpovtor(a, mxr, lv)
-    good_level(a, lv, mxr)
-
-    print("Уровень пароля не определён (попробуйте изменить критерии).")
-
+def main() -> None:
+    psswd = input("Введите пароль: ")
+    evaluation = analyze_password(psswd)
+    print(f"Уровень: {evaluation.level}")
+    print(evaluation.message)
 
 
 if __name__ == "__main__":
     main()
-
