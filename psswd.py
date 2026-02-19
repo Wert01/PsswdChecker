@@ -100,6 +100,10 @@ def analyze_password(psswd: str, common_path: Path | None = None) -> Evaluation:
         message=message,
     )
 
+def mantra() -> None:
+    for i in range (100):
+        mntr = "Sabbe sattā bhavantu sukhitattā."
+
 
 def main() -> None:
     psswd = input("Введите пароль: ")
